@@ -4,38 +4,62 @@
   <title>Hartslagmeter</title>
 </head>
 <body>
-  <video id="video" width="400" height="300" autoplay></video>
-  <button id="startButton">Start Camera</button>
-  <button id="flashButton">Activeer Flitser</button>
+  <div id="console"></div>
+  <button class="switch">Toggle Flash</button>
 
   <script>
-    const video = document.getElementById('video');
-    const startButton = document.getElementById('startButton');
-    const flashButton = document.getElementById('flashButton');
+    const consoleOutput = document.getElementById("console");
+    const log = function (msg) {
+      consoleOutput.innerText = `${consoleOutput.innerText}\n${msg}`;
+      console.log(msg);
+    }
 
-    startButton.onclick = function() {
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(function(stream) {
-          video.srcObject = stream;
-        })
-        .catch(function(error) {
-          console.log("Error accessing camera:", error);
-        });
-    };
+    const SUPPORTS_MEDIA_DEVICES = 'mediaDevices' in navigator;
 
-    flashButton.onclick = function() {
-      const track = video.srcObject.getVideoTracks()[0];
-      const capabilities = track.getCapabilities();
+    if (SUPPORTS_MEDIA_DEVICES) {
+      navigator.mediaDevices.enumerateDevices().then(devices => {
+        const cameras = devices.filter((device) => device.kind === 'videoinput');
 
-      if (capabilities.torch) {
-        const settings = track.getSettings();
-        track.applyConstraints({
-          advanced: [{ torch: !settings.torch }]
-        });
-      } else {
-        console.log("Flitser wordt niet ondersteund.");
-      }
-    };
+        if (cameras.length === 0) {
+          log('No camera found on this device.');
+        }
+
+        navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'environment',
+          }
+        }).then(stream => {
+          const track = stream.getVideoTracks()[0];
+          const imageCapture = new ImageCapture(track)
+
+          imageCapture.getPhotoCapabilities().then(capabilities => {
+            const btn = document.querySelector('.switch');
+            const torchSupported = !!capabilities.torch || (
+              'fillLightMode' in capabilities &&
+              capabilities.fillLightMode.length != 0 &&
+              capabilities.fillLightMode != 'none'
+            );
+
+            if (torchSupported) {
+              let torch = false;
+              btn.addEventListener('click', function (e) {
+                try {
+                  track.applyConstraints({
+                    advanced: [{
+                      torch: (torch = !torch)
+                    }]
+                  });
+                } catch (err) {
+                  log(err);
+                }
+              });
+            } else {
+              log("No torch found");
+            }
+          }).catch(log);
+        }).catch(log);
+      }).catch(log);
+    }
   </script>
 </body>
 </html>
