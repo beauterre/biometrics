@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hartslagmeter</title>
+</head>
+<body>
+  <video id="video" width="400" height="300" autoplay></video>
+  <button id="startButton">Start Camera</button>
+  <button id="flashButton">Activeer Flitser</button>
+
+  <script>
+    const video = document.getElementById('video');
+    const startButton = document.getElementById('startButton');
+    const flashButton = document.getElementById('flashButton');
+
+    startButton.onclick = function() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+          video.srcObject = stream;
+        })
+        .catch(function(error) {
+          console.log("Error accessing camera:", error);
+        });
+    };
+
+    flashButton.onclick = function() {
+      const track = video.srcObject.getVideoTracks()[0];
+      const capabilities = track.getCapabilities();
+
+      if (capabilities.torch) {
+        const settings = track.getSettings();
+        track.applyConstraints({
+          advanced: [{ torch: !settings.torch }]
+        });
+      } else {
+        console.log("Flitser wordt niet ondersteund.");
+      }
+    };
+  </script>
+</body>
+</html>

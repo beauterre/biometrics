@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Data Visualization</title>
+  <style>
+    #graph-container {
+      width: 800px;
+      height: 400px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <svg id="graph-container"></svg><hr>
+  <button onclick="showLast('24h')">Last 24 Hours</button>
+  <button onclick="showLast('1w')">Last week</button>
+  <button onclick="showLast('2w')">Last 2 Weeks</button>
+  <button onclick="showLast('1m')">Last Month</button>
+  <button onclick="showLast('2m')">Last 2 Months</button>
+  <button onclick="showLast('1y')">Last Year</button>
+  <button onclick="showLast('2y')">Last 2 Years</button>
+  <button onclick="showLast('all')">All</button>
+   |
+  <button onclick="newEntry()">+ New Entry</button>
+  <hr>
+  <script src="graph.js"></script>
+  <script>
+    width=800;
+    height=400;
+    function newEntry()
+    {
+      location.href="new_entry.html";
+    }
+    function showLast(inderval)
+    {
+      console.log("display "+inderval);
+      switch(inderval)
+      {
+        case "24h":
+          showGraph(Date.now()-24*60*60*1000,Date.now(),60*60*1000);
+        break;
+        case "1w":
+          showGraph(Date.now()-7*24*60*60*1000,Date.now(),24*60*60*1000);
+        break;
+        case "2w":
+          showGraph(Date.now()-14*24*60*60*1000,Date.now(),24*60*60*1000);
+        break;
+        case "1m":
+          showGraph(Date.now()-31*24*60*60*1000,Date.now(),7*24*60*60*1000);
+        break;
+        case "2m":
+          showGraph(Date.now()-62*24*60*60*1000,Date.now(),7*24*60*60*1000);
+        break;
+        case "1y":
+          showGraph(Date.now()-366*24*60*60*1000,Date.now(),30*24*60*60*1000);
+        break;
+        case "2y":
+          showGraph(Date.now()-732*24*60*60*1000,Date.now(),30*24*60*60*1000);
+        break;
+      }
+    }
+    showLast("24h");
+    
+  </script>
+</body>
+</html>
