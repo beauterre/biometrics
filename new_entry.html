@@ -53,8 +53,10 @@
     // these are the metrics for the datapoints
     let metrics = [
       { label: "weight", unit: "kg", min: 0, max: 120 },
-      { label: "worked", unit: "hours", min: 0, max: 24 },
-      { label: "sleep", unit: "hours", min: 0, max: 24 },
+      { label: "worked", unit: "hours", min: 0, max: 24 , app: "prikklok.html?metric=werk"},
+      { label: "hartslag", unit: "bpm", min: 30, max: 240, app: "hart.html" },
+      { label: "sleep", unit: "hours", min: 0, max: 24 , app: "prikklok.html?metric=slaap"},
+      { label: "aanval", unit: "hours", min: 0, max: 24 , app: "prikklok.html?metric=aanval"},
       { label: "stress", unit: "(1-10)", min: 1, max: 10 },
       { label: "dizziness", unit: "(1-10)", min: 1, max: 10 },
       { label: "memory", unit: "(1-10)", min: 1, max: 10 },
@@ -62,7 +64,8 @@
       { label: "ataxia", unit: "(1-10)", min: 1, max: 10 },
       { label: "clarity", unit: "(1-10)", min: 1, max: 10 },
     ];
-        function getColorFromLabel(label) {
+    function getColorFromLabel(label)
+    {
       const charCodes = label.split('').map(char => char.charCodeAt(0));
       const sum = charCodes.reduce((acc, val) => acc + val, 0);
       const r = sum % 192;
@@ -196,11 +199,21 @@
       label.setAttribute('for', metric.label);
       label.innerText = metric.label;
 
-      pair.style.backgroundColor = metric.color;
       pair.appendChild(label);
+      pair.style="border-radius: 25px; padding: 5px 35px; background-color: "+ metric.color;
       pair.appendChild(slider);
       pair.appendChild(valueLabel);
       pair.appendChild(unitLabel);
+      if(typeof(metric.app)!="undefined")
+      {
+        let button = document.createElement('a');
+        button.style = "color: #fff;width: 100px;display:inline-block;";
+        button.href=metric.app;
+        button.style = "color: #fff; background: #000; padding: 5px 15px; margin-left: 10px; text-align: center; border-radius: 25px; width: 100px;display:inline-block;";
+        button.innerText = "hulpprogramma";
+        pair.appendChild(button);
+        
+      }
       sliderContainer.appendChild(pair);
       metricSliders.appendChild(sliderContainer);
     });
