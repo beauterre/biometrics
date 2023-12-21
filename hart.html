@@ -6,6 +6,7 @@
 <body>
   <div id="console"></div>
   <button class="switch">Toggle Flash</button>
+  <video id="video" width="400" height="300" autoplay></video>
 
   <script>
     const consoleOutput = document.getElementById("console");
@@ -31,6 +32,9 @@
         }).then(stream => {
           const track = stream.getVideoTracks()[0];
           const imageCapture = new ImageCapture(track)
+
+          const video = document.getElementById('video');
+          video.srcObject = stream;
 
           imageCapture.getPhotoCapabilities().then(capabilities => {
             const btn = document.querySelector('.switch');
