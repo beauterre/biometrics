@@ -108,7 +108,7 @@
             measurement_str += " " + hart;
             if (measurement_str.length > 250) {
               // tickertape it..
-              measurement_str = measurement_str.substr(1, measurement_str.length);
+              measurement_str = measurement_str.substr(2, measurement_str.length);
             }
             document.getElementById("measurement").innerHTML = measurement_str;
           break;
