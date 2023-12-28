@@ -3,22 +3,29 @@
 <head>
   <title>Hartslagmeter</title>
   <style>
+    body{
+      font-face: sans-serif;
+    }
     canvas
     {
       background: #eee;
       border-radius: 15px;
     }
+    #bpm{
+      font-size:100px;
+    
+    }
   </style>
 </head>
 <body>
   <h1>Hartslagmeter</h1>
-  v.28.12.23.12.00
+  v.28.12.23.12.12
   <div id="console"></div>
   <audio id="beep" src="beep.wav"></audio>
   <canvas id="history" width=400 height=200></canvas>
   <button class="switch">Toggle Flash</button>
   <video id="video" width="400" height="300" autoplay></video>
-  <div id="measurement"></div>
+  <div id="bpm"></div>
   <div id="status"></div>
 
   <script>
@@ -85,7 +92,7 @@
     }
     var canvas=document.getElementById("history");
     var ctx=canvas.getContext("2d");
-    var measurement_str = "",min,max,calibrate=0,lastMeasurements = [],rawMeasurements = [];
+    var beepstatus="",measurement_str = "",min,max,calibrate=0,lastMeasurements = [],rawMeasurements = [], lastbeat=0, intervals=[];
     function adjustRange(m)
     {
         rawMeasurements.push(m);
@@ -112,7 +119,6 @@
         for(var i=0;i<lastMeasurements.length;i++)
         {
           var a=lastMeasurements[i]-0.5;
-          //console.log(a);
           if(i==0) ctx.moveTo(i,100+a*100);
           else ctx.lineTo(i,100+a*100);
         }
@@ -130,11 +136,10 @@
             calibrate=0
             status = "calibrating";
           }
-          console.log(col);
           break;
         case "calibrating":
           calibrate++;
-          if(calibrate<100)
+          if(calibrate<10)
           {
             min=10000; // wait a little, then calibrate.. to make things rest.
             max=-10000;
@@ -144,26 +149,32 @@
           if (min>col.r) min=col.r;
           if (col.r>max) max=col.r;
           // finding min and max for a while.
-            document.getElementById("measurement").innerHTML = measurement_str;
-            measurement_str = ""+Math.floor(100*calibrate/200)+"%" ;
-          if(calibrate>200)
+          if(calibrate>20)
           {
             status="measuring";
-            measurement_str ="";
           }
         break;
         case "measuring":
             var col = getAverageColor(video, { x: 0, w: video.width, y: 0, h: video.height });
             adjustRange(col.r);
-            console.log(min, col.r,max);
             var hart=Math.floor(10*(col.r-min)/(max-min));
-            console.log(col);
-            measurement_str += " " + hart;
-            if (measurement_str.length > 250) {
-              // tickertape it..
-              measurement_str = measurement_str.substr(2, measurement_str.length);
+            if(hart==0) beepstatus="down";
+            if(hart>8 && beepstatus=="down")
+            {
+              document.getElementById("beep").play();
+              beepstatus="up";
+              var interval=Date.now()-lastbeat;
+              console.log("interval "+interval);
+              lastbeat=Date.now();
+              if(lastbeat!=0)
+                intervals.push(interval);
+                if(interval!=0)
+                {
+                  var bpm=Math.floor(60000/interval);
+                  document.getElementById("bpm").innerHTML=bpm;
+                }
             }
-            document.getElementById("measurement").innerHTML = measurement_str;
+            
           break;
       }
       window.requestAnimationFrame(loop);
