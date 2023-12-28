@@ -75,7 +75,7 @@
 
     var measurement_str = "",min=10000,max=-10000,calibrate=0;
     function loop() {
-      document.getElementById("status").innerHTML = status;
+      document.getElementById("status").innerHTML = status +" - "+ (Date.now()%1000);
       switch (status) {
         case "waiting for red":
           var col = getAverageColor(video, { x: 0, w: video.width, y: 0, h: video.height });
@@ -92,14 +92,19 @@
           if (min>col.r) min=col.r;
           if (col.r>max) max=col.r;
           // finding min and max for a while.
+            measurement_str += " " + col.r;
+            document.getElementById("measurement").innerHTML = measurement_str;
           calibrate++;
           if(calibrate>200)
           {
-            status="measuring "+min+"/"+col.r+"/"+max;
+            status="measuring";
+            measurement_str ="";
           }
+        break;
         case "measuring":
             var col = getAverageColor(video, { x: 0, w: video.width, y: 0, h: video.height });
             var hart=Math.floor(10*(col.r-min)/(max-min));
+            console.log(col);
             measurement_str += " " + hart;
             if (measurement_str.length > 250) {
               // tickertape it..
