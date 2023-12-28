@@ -11,8 +11,10 @@
       background: #eee;
       border-radius: 15px;
     }
-    #bpm{
-      font-size:100px;
+    #bpm,#hrv{
+      width: 40%;
+      display: inline-block;
+      font-size:50px;
     
     }
   </style>
@@ -25,7 +27,8 @@
   <canvas id="history" width=400 height=200></canvas>
   <button class="switch">Toggle Flash</button>
   <video id="video" width="400" height="300" autoplay></video>
-  <div id="bpm"></div>
+  <fieldset id="bpm"><legend>BMP</legend></fieldset>
+  <fieldset id="hrv"><legend>HRV</legend></fieldset>
   <div id="status"></div>
 
   <script>
@@ -125,6 +128,27 @@
         ctx.stroke();
     }
 
+   function calculateHRV(intervals) {
+  // Ensure there are enough intervals to compute HRV
+  if (intervals.length < 2) {
+    return 0; // HRV cannot be calculated with less than 2 intervals
+  }
+
+  // Calculate the squared differences between successive intervals
+  const squaredDifferences = [];
+  for (let i = 1; i < intervals.length; i++) {
+    const diff = intervals[i] - intervals[i - 1];
+    squaredDifferences.push(diff * diff);
+  }
+
+  // Compute the mean of the squared differences
+  const meanSquaredDiff = squaredDifferences.reduce((acc, curr) => acc + curr, 0) / squaredDifferences.length;
+
+  // Return the square root of the mean squared difference as HRV
+  return Math.sqrt(meanSquaredDiff);
+}
+
+
     function loop() {
       document.getElementById("status").innerHTML = status +" - "+ (Date.now()%1000);
       switch (status) {
@@ -166,12 +190,17 @@
               var interval=Date.now()-lastbeat;
               console.log("interval "+interval);
               lastbeat=Date.now();
-              if(lastbeat!=0)
+              if(lastbeat!=0 && interval>0 && interval<3000)
                 intervals.push(interval);
+                if(intervals.length>5)
+                {
+                  var hrv=calculateHRV(intervals);
+                  document.getElementById("hrv").innerHTML="<legend>hrv</legend>"+hrv;
+                }
                 if(interval!=0)
                 {
                   var bpm=Math.floor(60000/interval);
-                  document.getElementById("bpm").innerHTML=bpm;
+                  document.getElementById("bpm").innerHTML="<legend>bpm</legend>"+bpm;
                 }
             }
             
