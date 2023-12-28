@@ -5,7 +5,7 @@
 </head>
 <body>
   <h1>Hartslagmeter</h1>
-  v.28.12.23.11.07
+  v.28.12.23.11.10
   <div id="console"></div>
   <button class="switch">Toggle Flash</button>
   <video id="video" width="400" height="300" autoplay></video>
@@ -102,7 +102,7 @@
           if (col.r>max) max=col.r;
           // finding min and max for a while.
             document.getElementById("measurement").innerHTML = measurement_str;
-            measurement_str = "calibrating... "+Math.floor(100*calibrating/200)+"%" ;
+            measurement_str = ""+Math.floor(100*calibrate/200)+"%" ;
           if(calibrate>200)
           {
             status="measuring";
