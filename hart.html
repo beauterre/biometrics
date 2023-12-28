@@ -2,11 +2,20 @@
 <html>
 <head>
   <title>Hartslagmeter</title>
+  <style>
+    canvas
+    {
+      background: #eee;
+      border-radius: 15px;
+    }
+  </style>
 </head>
 <body>
   <h1>Hartslagmeter</h1>
-  v.28.12.23.11.22
+  v.28.12.23.12.00
   <div id="console"></div>
+  <audio id="beep" src="beep.wav"></audio>
+  <canvas id="history" width=400 height=200></canvas>
   <button class="switch">Toggle Flash</button>
   <video id="video" width="400" height="300" autoplay></video>
   <div id="measurement"></div>
@@ -74,23 +83,42 @@
         }).catch(log);
       }).catch(log);
     }
-
+    var canvas=document.getElementById("history");
+    var ctx=canvas.getContext("2d");
+    var measurement_str = "",min,max,calibrate=0,lastMeasurements = [],rawMeasurements = [];
     function adjustRange(m)
     {
-        lastMeasurements.push(m);
-        if(lastMeasurements.length>35)lastMeasurements.shift();
-        console.log("measurements for average:"+lastMeasurements.length);
+        rawMeasurements.push(m);
+        if(rawMeasurements.length>35)rawMeasurements.shift();
         min=10000;
         max=-10000;
         for(var i=0;i<lastMeasurements.length;i++)
         {
-           if (lastMeasurements[i]<min) min=lastMeasurements[i];
-          if (lastMeasurements[i]>max) max=lastMeasurements[i];
+           if (rawMeasurements[i]<min) min=rawMeasurements[i];
+          if (rawMeasurements[i]>max) max=rawMeasurements[i];
         }
-        
+        // save the adjusted one
+        lastMeasurements.push((m-min)/(max-min));
+        // tickertape and display it..
+        if(lastMeasurements.length>400)lastMeasurements.shift();
+        ctx.clearRect(0,0,400,200);
+        ctx.strokeStyle="#888";
+        ctx.beginPath();
+        ctx.moveTo(0,100);
+        ctx.lineTo(400,100);
+        ctx.stroke();
+        ctx.strokeStyle="#800";
+        ctx.beginPath();
+        for(var i=0;i<lastMeasurements.length;i++)
+        {
+          var a=lastMeasurements[i]-0.5;
+          //console.log(a);
+          if(i==0) ctx.moveTo(i,100+a*100);
+          else ctx.lineTo(i,100+a*100);
+        }
+        ctx.stroke();
     }
 
-    var measurement_str = "",min,max,calibrate=0,lastMeasurements = [];
     function loop() {
       document.getElementById("status").innerHTML = status +" - "+ (Date.now()%1000);
       switch (status) {
