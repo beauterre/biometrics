@@ -7,13 +7,16 @@
   <div id="console"></div>
   <button class="switch">Toggle Flash</button>
   <video id="video" width="400" height="300" autoplay></video>
+  <div id="measurement"></div>
+  <div id="status"></div>
 
   <script>
+    let status = "waiting for camera";
     const consoleOutput = document.getElementById("console");
     const log = function (msg) {
       consoleOutput.innerText = `${consoleOutput.innerText}\n${msg}`;
       console.log(msg);
-    }
+    };
 
     const SUPPORTS_MEDIA_DEVICES = 'mediaDevices' in navigator;
 
@@ -31,7 +34,7 @@
           }
         }).then(stream => {
           const track = stream.getVideoTracks()[0];
-          const imageCapture = new ImageCapture(track)
+          const imageCapture = new ImageCapture(track);
 
           const video = document.getElementById('video');
           video.srcObject = stream;
@@ -56,13 +59,78 @@
                 } catch (err) {
                   log(err);
                 }
+                status = "waiting for red";
+                loop();
               });
             } else {
               log("No torch found");
+              // continue anyway for testing..
+              status = "waiting for red";
+              loop();
             }
           }).catch(log);
         }).catch(log);
       }).catch(log);
+    }
+
+    var measurement_str = "";
+    function loop() {
+      document.getElementById("status").innerHTML = status;
+      switch (status) {
+        case "waiting for red":
+          var col = getAverageColor(video, { x: 0, w: video.width, y: 0, h: video.height });
+          var greenblue = col.g + col.b;
+          if (col.r > greenblue )
+          {
+            status = "red achieved";
+          }
+          console.log(col);
+          break;
+        case "red achieved":
+          var col = getAverageColor(video, { x: 0, w: video.width, y: 0, h: video.height });
+          if(col.r<10) measurement_str += " 00" + col.r;
+          else
+          if(col.r<100) measurement_str += " 0" + col.r;
+          else
+          measurement_str += " " + col.r;
+          if (measurement_str.length > 250) {
+            // tickertape it..
+            measurement_str = measurement_str.substr(4, measurement_str.length);
+          }
+          document.getElementById("measurement").innerHTML = measurement_str;
+          break;
+      }
+      window.requestAnimationFrame(loop);
+    }
+
+    function getAverageColor(canvas, area) {
+      // Create a 1x1 pixel canvas
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = 1;
+      tempCanvas.height = 1;
+      const tempCtx = tempCanvas.getContext('2d');
+
+      // Get the area to be copied
+      const x = area.x || 0;
+      const y = area.y || 0;
+      const width = area.w || canvas.width;
+      const height = area.h || canvas.height;
+
+      // Draw the specified area onto the 1x1 canvas
+      tempCtx.drawImage(canvas, x, y, width, height, 0, 0, 1, 1);
+
+      // Get the pixel data of the 1x1 canvas
+      const pixelData = tempCtx.getImageData(0, 0, 1, 1).data;
+
+      // Calculate the average color (RGBA values)
+      const averageColor = {
+        r: pixelData[0],
+        g: pixelData[1],
+        b: pixelData[2],
+        a: pixelData[3] / 255 // Normalize alpha value (0-1 range)
+      };
+
+      return averageColor;
     }
   </script>
 </body>
