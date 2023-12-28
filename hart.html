@@ -88,13 +88,19 @@
           console.log(col);
           break;
         case "calibrating":
+          calibrate++;
+          if(calibrate<100)
+          {
+            min=10000; // wait a little, then calibrate.. to make things rest.
+            max=-10000;
+            measurement_str = "calibrating..." ;
+          }
           var col = getAverageColor(video, { x: 0, w: video.width, y: 0, h: video.height });
           if (min>col.r) min=col.r;
           if (col.r>max) max=col.r;
           // finding min and max for a while.
-            measurement_str += " " + col.r;
             document.getElementById("measurement").innerHTML = measurement_str;
-          calibrate++;
+            measurement_str = "calibrating... "+Math.floor(100*calibrating/200)+"%" ;
           if(calibrate>200)
           {
             status="measuring";
