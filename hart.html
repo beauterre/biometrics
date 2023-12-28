@@ -5,7 +5,7 @@
 </head>
 <body>
   <h1>Hartslagmeter</h1>
-  v.28.12.23.11.10
+  v.28.12.23.11.22
   <div id="console"></div>
   <button class="switch">Toggle Flash</button>
   <video id="video" width="400" height="300" autoplay></video>
@@ -75,7 +75,22 @@
       }).catch(log);
     }
 
-    var measurement_str = "",min=10000,max=-10000,calibrate=0;
+    function adjustRange(m)
+    {
+        lastMeasurements.push(m);
+        if(lastMeasurements.length>35)lastMeasurements.shift();
+        console.log("measurements for average:"+lastMeasurements.length);
+        min=10000;
+        max=-10000;
+        for(var i=0;i<lastMeasurements.length;i++)
+        {
+           if (lastMeasurements[i]<min) min=lastMeasurements[i];
+          if (lastMeasurements[i]>max) max=lastMeasurements[i];
+        }
+        
+    }
+
+    var measurement_str = "",min,max,calibrate=0,lastMeasurements = [];
     function loop() {
       document.getElementById("status").innerHTML = status +" - "+ (Date.now()%1000);
       switch (status) {
@@ -111,6 +126,8 @@
         break;
         case "measuring":
             var col = getAverageColor(video, { x: 0, w: video.width, y: 0, h: video.height });
+            adjustRange(col.r);
+            console.log(min, col.r,max);
             var hart=Math.floor(10*(col.r-min)/(max-min));
             console.log(col);
             measurement_str += " " + hart;
