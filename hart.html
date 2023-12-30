@@ -190,13 +190,15 @@
               var interval=Date.now()-lastbeat;
               console.log("interval "+interval);
               lastbeat=Date.now();
-              if(lastbeat!=0 && interval>0 && interval<3000)
+              if(lastbeat!=0 && interval<2000 && iterval>300)// too high and too low is obvious outlier measurement.
                 intervals.push(interval);
                 if(intervals.length>5)
                 {
                   var hrv=calculateHRV(intervals);
-                  document.getElementById("hrv").innerHTML="<legend>hrv</legend>"+hrv;
+                  document.getElementById("hrv").innerHTML="<legend>intervalhrv</legend>"+hrv;
                 }
+                if(intervals.length>20)intervals.shift();// just to make it get better/more accurate in time..
+
                 if(interval!=0)
                 {
                   var bpm=Math.floor(60000/interval);
