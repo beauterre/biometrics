@@ -152,6 +152,7 @@
     metrics.forEach(metric => {
       const sliderContainer = document.createElement('div');
       sliderContainer.style.marginBottom = '10px';
+      sliderContainer.style.fontSize = '3vh';
 
       const pair = document.createElement('div');
 
@@ -209,7 +210,7 @@
         let button = document.createElement('a');
         button.style = "color: #fff;width: 100px;display:inline-block;";
         button.href=metric.app;
-        button.style = "color: #fff; background: #000; padding: 5px 15px; margin-left: 10px; text-align: center; border-radius: 25px; width: 100px;display:inline-block;";
+        button.style = "color: #fff; background: #000; padding: 5px 15px; margin-left: 10px; text-align: center; border-radius: 25px; min-width: 100px;display:inline-block;";
         button.innerText = "hulpprogramma";
         pair.appendChild(button);
         
