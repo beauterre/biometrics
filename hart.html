@@ -21,7 +21,7 @@
 </head>
 <body>
   <h1>Hartslagmeter</h1>
-  v.30.12.23.20.34
+  v.20.12.23.21.45
   <div id="console"></div>
   <audio id="beep" src="beep.wav"></audio>
   <canvas id="history" width=400 height=200></canvas>
@@ -190,7 +190,7 @@
               var interval=Date.now()-lastbeat;
               console.log("interval "+interval);
               lastbeat=Date.now();
-              if(lastbeat!=0 && interval<2000 && iterval>300)// too high and too low is obvious outlier measurement.
+              if(lastbeat!=0 && interval<2000 && interval>300)// too high s
                 intervals.push(interval);
                 if(intervals.length>5)
                 {
