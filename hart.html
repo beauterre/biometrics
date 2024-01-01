@@ -30,7 +30,7 @@
 </head>
 <body>
   <h1>Hartslagmeter</h1>
-  v.01.01.24.15.25
+  v.01.01.24.15.35
   <div id="console"></div>
   <audio id="beep" src="beep.wav"></audio>
   <canvas id="history" width=400 height=200></canvas>
@@ -249,7 +249,7 @@ function calculateStd(array) {
                   
                   document.getElementById("hrv").innerHTML = "<legend>HRV-STRESS(20-100)</legend>" + hrv;
                   document.getElementById("hrv").style.backgroundColor= hrvColor;
-                  document.getElementById("sdnn").innerHTML = "<legend>SDNN- HEALTH (20-50)</legend>" + sdnnColor;
+                  document.getElementById("sdnn").innerHTML = "<legend>SDNN- HEALTH (20-50)</legend>" + sdnn;
                   document.getElementById("sdnn").style.backgroundColor= sdnnColor;
                   document.getElementById("cv").innerHTML = "<legend>CV - ADAPTABILITY(0-0.5)</legend>" + cv;
                   document.getElementById("cv").style.backgroundColor= cvColor;
