@@ -25,7 +25,7 @@
 </head>
 <body>
   <h1>Hartslagmeter</h1>
-  v.01.01.24.14.55
+  v.01.01.24.15.13
   <div id="console"></div>
   <audio id="beep" src="beep.wav"></audio>
   <canvas id="history" width=400 height=200></canvas>
@@ -235,11 +235,17 @@ function calculateStd(array) {
                 if(intervals.length>5)
                 {
                   var hrv=calculateHRV(intervals);
-                  document.getElementById("hrv").innerHTML="<legend>hrv(20-100)</legend>"+hrv;
                   var sdnn=calculateSDNN(intervals);
-                  document.getElementById("sdnn").innerHTML="<legend>sdnn (20-50)</legend>"+sdnn;
                   var cv=calculateCV(intervals);
-                  document.getElementById("cv").innerHTML="<legend>cv (0.5)</legend>"+cv;
+
+                  var hrvColor = setColor(hrv, 20, 100);
+                  var sdnnColor = setColor(sdnn, 20, 50);
+                  var cvColor = setColor(cv, 0, 0.5);
+                  
+                  document.getElementById("hrv").innerHTML = "<legend>hrv(20-100)</legend><span style='color:" + hrvColor + "'>" + hrv + "</span>";
+                  document.getElementById("sdnn").innerHTML = "<legend>sdnn (20-50)</legend><span style='color:" + sdnnColor + "'>" + sdnn + "</span>";
+                  document.getElementById("cv").innerHTML = "<legend>cv (0-0.5)</legend><span style='color:" + cvColor + "'>" + cv + "</span>";
+
                 }
                 if(intervals.length>7)intervals.shift();// just to make it get better/more accurate in time..
 
@@ -254,6 +260,17 @@ function calculateStd(array) {
       }
       window.requestAnimationFrame(loop);
     }
+    function setColor(value, min, max) {
+    if (value < min || value > max) {
+        return 'red'; // Values outside the desired range are red
+    } else {
+        // Calculate the color gradient based on the value's position within the range
+        const percent = (value - min) / (max - min);
+        const green = Math.round(255 * percent);
+        const red = Math.round(255 * (1 - percent));
+        return `rgb(${red}, ${green}, 0)`;
+    }
+}
 
     function getAverageColor(canvas, area) {
       // Create a 1x1 pixel canvas
