@@ -11,11 +11,15 @@
       background: #eee;
       border-radius: 15px;
     }
-    #bpm,#hrv{
-      width: 40%;
+    #bpm,#hrv, #cv, #sdnn{
+      width: 20%;
       display: inline-block;
-      font-size:50px;
+      font-size:20px;
     
+    }
+    .switch{
+      padding: 25px;
+      border-radius:25px;
     }
   </style>
 </head>
@@ -25,10 +29,14 @@
   <div id="console"></div>
   <audio id="beep" src="beep.wav"></audio>
   <canvas id="history" width=400 height=200></canvas>
-  <button class="switch">Toggle Flash</button>
-  <video id="video" width="400" height="300" autoplay></video>
+  <button class="switch">Light</button>
+  <video id="video" width="400" height="300" style="width:50px; height: 50px; border-radius:25px;" autoplay></video>
+  <div>
   <fieldset id="bpm"><legend>BMP</legend></fieldset>
   <fieldset id="hrv"><legend>HRV</legend></fieldset>
+  <fieldset id="sdnn"><legend>SDNN</legend></fieldset>
+  <fieldset id="cv"><legend>CV</legend></fieldset>
+  </div>
   <div id="status"></div>
 
   <script>
@@ -128,6 +136,38 @@
         ctx.stroke();
     }
 
+
+function calculateCV(nnIntervals) {
+    const meanNNI = calculateMean(nnIntervals);
+    const stdNNI = calculateStd(nnIntervals);
+
+    const cv = stdNNI / meanNNI;
+    return cv;
+}
+
+function calculateSDNN(nnIntervals) {
+    const stdNNI = calculateStd(nnIntervals);
+    return stdNNI;
+}
+
+function calculateMean(array) {
+    const sum = array.reduce((acc, val) => acc + val, 0);
+    return sum / array.length;
+}
+
+function calculateVariance(array) {
+    const mean = calculateMean(array);
+    const squareDiffs = array.map(val => Math.pow(val - mean, 2));
+    const sumSquareDiffs = squareDiffs.reduce((acc, val) => acc + val, 0);
+    const variance = sumSquareDiffs / array.length;
+    return variance;
+}
+
+function calculateStd(array) {
+    const variance = calculateVariance(array);
+    const std = Math.sqrt(variance);
+    return std;
+}
    function calculateHRV(intervals) {
   // Ensure there are enough intervals to compute HRV
   if (intervals.length < 2) {
@@ -195,9 +235,13 @@
                 if(intervals.length>5)
                 {
                   var hrv=calculateHRV(intervals);
-                  document.getElementById("hrv").innerHTML="<legend>intervalhrv</legend>"+hrv;
+                  document.getElementById("hrv").innerHTML="<legend>hrv(20-100)</legend>"+hrv;
+                  var sdnn=calculateSDNN(intervals);
+                  document.getElementById("sdnn").innerHTML="<legend>sdnn (20-50)</legend>"+sdnn;
+                  var cv=calculateCV(intervals);
+                  document.getElementById("cv").innerHTML="<legend>cv (0.5)</legend>"+cv;
                 }
-                if(intervals.length>20)intervals.shift();// just to make it get better/more accurate in time..
+                if(intervals.length>7)intervals.shift();// just to make it get better/more accurate in time..
 
                 if(interval!=0)
                 {
