@@ -17,6 +17,11 @@
       font-size:20px;
     
     }
+    legend
+    {
+    background: #fff;
+    border-radius: 15px;
+    }
     .switch{
       padding: 25px;
       border-radius:25px;
@@ -25,7 +30,7 @@
 </head>
 <body>
   <h1>Hartslagmeter</h1>
-  v.01.01.24.15.13
+  v.01.01.24.15.25
   <div id="console"></div>
   <audio id="beep" src="beep.wav"></audio>
   <canvas id="history" width=400 height=200></canvas>
@@ -238,13 +243,16 @@ function calculateStd(array) {
                   var sdnn=calculateSDNN(intervals);
                   var cv=calculateCV(intervals);
 
-                  var hrvColor = setColor(hrv, 20, 100);
-                  var sdnnColor = setColor(sdnn, 20, 50);
-                  var cvColor = setColor(cv, 0, 0.5);
+                  var hrvColor = getColor(hrv, 20, 100);
+                  var sdnnColor = getColor(sdnn, 20, 50);
+                  var cvColor = getColor(cv, 0, 0.5);
                   
-                  document.getElementById("hrv").innerHTML = "<legend>hrv(20-100)</legend><span style='color:" + hrvColor + "'>" + hrv + "</span>";
-                  document.getElementById("sdnn").innerHTML = "<legend>sdnn (20-50)</legend><span style='color:" + sdnnColor + "'>" + sdnn + "</span>";
-                  document.getElementById("cv").innerHTML = "<legend>cv (0-0.5)</legend><span style='color:" + cvColor + "'>" + cv + "</span>";
+                  document.getElementById("hrv").innerHTML = "<legend>HRV-STRESS(20-100)</legend>" + hrv;
+                  document.getElementById("hrv").style.backgroundColor= hrvColor;
+                  document.getElementById("sdnn").innerHTML = "<legend>SDNN- HEALTH (20-50)</legend>" + sdnnColor;
+                  document.getElementById("sdnn").style.backgroundColor= sdnnColor;
+                  document.getElementById("cv").innerHTML = "<legend>CV - ADAPTABILITY(0-0.5)</legend>" + cv;
+                  document.getElementById("cv").style.backgroundColor= cvColor;
 
                 }
                 if(intervals.length>7)intervals.shift();// just to make it get better/more accurate in time..
@@ -252,7 +260,9 @@ function calculateStd(array) {
                 if(interval!=0)
                 {
                   var bpm=Math.floor(60000/interval);
-                  document.getElementById("bpm").innerHTML="<legend>bpm</legend>"+bpm;
+                  document.getElementById("bpm").innerHTML="<legend>BPM- FITNESS</legend>"+bpm;
+                  var bpmColor = getInverseColor(bpm, 55, 120);
+                  document.getElementById("bpm").style.backgroundColor= bpmColor;
                 }
             }
             
@@ -260,18 +270,29 @@ function calculateStd(array) {
       }
       window.requestAnimationFrame(loop);
     }
-    function setColor(value, min, max) {
+    function getColor(value, min, max) {
+      if (value < min || value > max) {
+          return 'red'; // Values outside the desired range are red
+      } else {
+          // Calculate the color gradient based on the value's position within the range
+          const percent = (value - min) / (max - min);
+          const green = Math.round(255 * percent);
+          const red = Math.round(255 * (1 - percent));
+          return `rgb(${red}, ${green}, 0)`;
+      }
+  }
+
+function getInverseColor(value, min, max) {
     if (value < min || value > max) {
         return 'red'; // Values outside the desired range are red
     } else {
         // Calculate the color gradient based on the value's position within the range
         const percent = (value - min) / (max - min);
-        const green = Math.round(255 * percent);
-        const red = Math.round(255 * (1 - percent));
+        const red = Math.round(255 * percent);
+        const green = Math.round(255 * (1 - percent));
         return `rgb(${red}, ${green}, 0)`;
     }
 }
-
     function getAverageColor(canvas, area) {
       // Create a 1x1 pixel canvas
       const tempCanvas = document.createElement('canvas');
