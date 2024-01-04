@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=800">
   <title>New Entry</title>
   <style>
     /* Add a class for blue sliders and apply filter */
@@ -33,7 +35,7 @@
   <!-- Input sliders for each metric -->
   <div id="metricSliders"></div>
 
-  <button onclick="saveData()">Save</button>
+  <button onclick="saveData()">Save All</button>
   <button onclick="cancel()">Cancel</button>
 
   <script>
@@ -52,13 +54,19 @@
 
     // these are the metrics for the datapoints
     let metrics = [
-      { label: "weight", unit: "kg", min: 0, max: 120 },
-      { label: "worked", unit: "hours", min: 0, max: 24 , app: "prikklok.html?metric=werk"},
+      { label: "weight", unit: "kg", min: 0, max: 120, step: 0.1 },
+      { label: "worked", unit: "hours", min: 0, max: 24 , step: 0.5, app: "prikklok.html?metric=werk"},
       { label: "hartslag", unit: "bpm", min: 30, max: 240, app: "hart.html" },
-      { label: "sleep", unit: "hours", min: 0, max: 24 , app: "prikklok.html?metric=slaap"},
-      { label: "aanval", unit: "hours", min: 0, max: 24 , app: "prikklok.html?metric=aanval"},
+      { label: "HRV", unit: "ms", min: 30, max: 240, app: "hart.html" },
+      { label: "SDNN", unit: "ms", min: 30, max: 240, app: "hart.html" },
+      { label: "CV", unit: "%%", min: 30, max: 240, app: "hart.html" },
+      { label: "eten", unit: "hours", min: 0, max: 24 , step: 0.5, app: "prikklok.html?metric=fitness", kind:"additive"}, // van tot -> naar uren.. + uren.. per dag
+      { label: "drinken", unit: "hours", min: 0, max: 24 , step: 0.5, app: "prikklok.html?metric=fitness", kind:"additive"}, // van tot -> naar uren.. + uren.. per dag
+      { label: "fitness", unit: "hours", min: 0, max: 24 , step: 0.5, app: "prikklok.html?metric=fitness", kind:"additive"}, // van tot -> naar uren.. + uren.. per dag
+      { label: "sleep", unit: "hours", min: 0, max: 24 , step: 0.5, app: "prikklok.html?metric=slaap", kind:"additive"}, // van tot -> naar uren.. + uren.. per dag
+      { label: "aanval", unit: "hours", min: 0, max: 24 , step: 0.5, app: "prikklok.html?metric=aanval", kind:"additive"}, // van tot -> naar uren.. + uren.. per dag
       { label: "stress", unit: "(1-10)", min: 1, max: 10 },
-      { label: "dizziness", unit: "(1-10)", min: 1, max: 10 },
+      { label: "dizziness", unit: "(1-10)", min: 1, max: 10},
       { label: "memory", unit: "(1-10)", min: 1, max: 10 },
       { label: "focus", unit: "(1-10)", min: 1, max: 10 },
       { label: "ataxia", unit: "(1-10)", min: 1, max: 10 },
@@ -100,6 +108,30 @@
       localStorage.setItem('dataPoints', JSON.stringify(dataPoints));
       
       location.href="index.html";
+    }
+    function saveSingleMetric(ev) {
+      var id=ev.currentTarget.id.split("-")[0];
+
+      const timestampInput = document.getElementById('timestamp');
+      const timestamp = timestampInput.value ? new Date(timestampInput.value).getTime() : Math.round(Date.now() / (5 * 60 * 1000)) * (5 * 60 * 1000);
+
+      const newData = {
+        ts: timestamp,
+      };
+
+      metrics.forEach(metric => {
+        if(metric.label==id)
+        {
+          const value = document.getElementById(metric.label).value;
+          newData[metric.label] = value;
+          ev.currentTarget.style.opacity="0.5";
+          console.log("saved "+id);
+        }
+      });
+
+      dataPoints.push(newData);
+      localStorage.setItem('dataPoints', JSON.stringify(dataPoints));
+      
     }
 
     function cancel()
@@ -162,8 +194,11 @@
       slider.setAttribute('id', metric.label);
       slider.setAttribute('min', metric.min);
       slider.setAttribute('max', metric.max);
+      if(typeof(metric.step)!="undefined")
+      slider.setAttribute('step', metric.step);
       slider.setAttribute('value', (metric.min + metric.max) / 2);
       slider.addEventListener("input", onInputSlider);
+      
 
       // Set color from label
       slider.style.background = metric.color;
@@ -172,7 +207,14 @@
       valueLabel.setAttribute('id', metric.label + '-value');
       valueLabel.type = "number";
       valueLabel.style = 'width: 50px; margin-left: 10px; color: #fff; background: transparent; border: none;'; // Set input styles
-
+  
+    // save button PER slider.
+      let savebutton = document.createElement('button');
+      savebutton.setAttribute('id', metric.label + '-save');
+      savebutton.innerText="Save";
+      savebutton.style = "position: absolute; right: 15px; color: #fff; background: #000; padding: 5px 15px; margin-left: 10px; text-align: center; border-radius: 25px; min-width: 100px;display:inline-block;";
+      savebutton.addEventListener("click",saveSingleMetric);
+  
 
      // Find the last recorded data point for each metric
       if (dataPoints.length!=0) {
@@ -189,9 +231,9 @@
 
       valueLabel.addEventListener("input", onInputValue);
 
-      let unitLabel = document.createElement('span');
+      let unitLabel = document.createElement('div');
       unitLabel.setAttribute('id', metric.label + '-unit');
-      unitLabel.style = 'margin-left: 5px; color: #fff';
+      unitLabel.style = 'margin-left: 5px; color: #fff;min-width: 50px; display: inline-block;';
       unitLabel.innerText = metric.unit;
 
       let label = document.createElement('div');
@@ -207,7 +249,7 @@
       pair.appendChild(unitLabel);
       if(typeof(metric.app)!="undefined")
       {
-        let button = document.createElement('a');
+        let button = document.createElement('button');
         button.style = "color: #fff;width: 100px;display:inline-block;";
         button.href=metric.app;
         button.style = "color: #fff; background: #000; padding: 5px 15px; margin-left: 10px; text-align: center; border-radius: 25px; min-width: 100px;display:inline-block;";
@@ -215,6 +257,7 @@
         pair.appendChild(button);
         
       }
+      pair.appendChild(savebutton);
       sliderContainer.appendChild(pair);
       metricSliders.appendChild(sliderContainer);
     });

@@ -4,6 +4,7 @@
 // Sample data points
 let dataPoints = JSON.parse(localStorage.getItem('dataPoints')) || [];
 
+console.log("retrieved "+dataPoints.length+" dataPoints");
 
     // these are the metrics for the datapoints
     let metrics = [

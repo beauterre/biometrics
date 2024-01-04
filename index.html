@@ -1,8 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=800, initial-scale=1">
   <title>Data Visualization</title>
   <style>
+    html,body{
+    margin: 0;
+    padding: 0;
+    background: #eee;
+    height: 100%;
+    width: 800px;
+    font-family: sans-serif;
+    }
     #graph-container {
       width: 800px;
       height: 400px;
@@ -10,22 +20,126 @@
     }
   button{
   font-size: 3vh;
+  border: 8px solid #ebebeb;
+  box-shadow: 0 0 2px #888, 0 0 20px rgba(0,0,128,0.5) inset;
+  color: #fff;
+  text-shadow: 0 0 7px #008;
+  background: rgb(131,39,184);
+  background: linear-gradient(0deg, rgba(39,200,226,1) 0%,  rgba(134,200,255,1) 100%);
   }
+  .periods button
+  {
+    border-radius: 1px;
+    font-size: 1.5em;
+  }
+  .periods button:last-child
+  {
+    border-radius: 0 0 15px 0;
+  }
+    .periods button:first-child
+  {
+    border-radius: 0 0 0 15px;
+  }
+  .periods{
+    width: 800px;
+    display: flex;
+  }
+  .new{
+      width: 800px;
+      display: flex;
+  }
+  .legend{
+      width: 800px;
+      display: flex;
+      padding: 0 15px;
+    box-sizing: border-box; /* Ensure padding is included in the width */
+    background:  #dedede;
+    box-shadow: 0 0 20px #bbb inset;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #fff;
+    margin: 0;
+  }
+  .legend .legend-entry{
+      width: 70px;
+      padding: 15px;
+      display: flex;
+      align-items: center; /* Vertically center items */
+      
+  }
+  .legend .legend-color{
+      border-radius: 50px;
+      width: 16px;
+      box-shadow: 0 0 4px #fff inset,0 0 4px #fff inset,0 0 4px #fff inset;
+      height: 16px;
+      border: 1px solid #888;
+      background: #f00;
+      display: inline-block;
+  }
+  .legend .legend-label{
+      display: inline-block;
+      line-height: 16px;
+      margin-left: 5px;
+      color: #888;
+  }
+  #graph-container{
+    background:  #ebebeb;
+    box-shadow: 0 0 20px #888 inset;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #fff;
+    margin: 0;
+  }
+.new button {
+    width: 100%;
+    padding: 8px; /* Adjust as needed */
+    margin: 0; /* Reset margin */
+    box-sizing: border-box; /* Ensure padding is included in the width */
+    border-radius: 15px 15px 0 0;
+}
+.file{
+  margin-top: 10px;
+}
+.file button {
+    width: calc(100% - 36px);
+    margin: 10px;
+    box-sizing: border-box; /* Ensure padding is included in the width */
+    border-radius: 15px;
+}
   </style>
 </head>
 <body>
-  <svg id="graph-container"></svg><hr>
-  <button onclick="showLast('24h')">Last 24 Hours</button>
-  <button onclick="showLast('1w')">Last week</button>
-  <button onclick="showLast('2w')">Last 2 Weeks</button>
-  <button onclick="showLast('1m')">Last Month</button>
-  <button onclick="showLast('2m')">Last 2 Months</button>
-  <button onclick="showLast('1y')">Last Year</button>
-  <button onclick="showLast('2y')">Last 2 Years</button>
-  <button onclick="showLast('all')">All</button>
-   |
-  <button onclick="newEntry()">+ New Entry</button>
-  <hr>
+  <div class="new">
+    <button onclick="newEntry()">+ New Entry</button>
+  </div>
+    <svg id="graph-container"></svg>
+  <div class="legend">
+    <div class="legend-entry">
+      <div class="legend-color"></div>
+      <div class="legend-label">BPM</div>
+    </div>
+    <div class="legend-entry">
+      <div class="legend-color"></div>
+      <div class="legend-label">BPM</div>
+    </div>
+    <div class="legend-entry">
+      <div class="legend-color"></div>
+      <div class="legend-label">BPM</div>
+    </div>
+  </div>
+  <div class="periods">
+    <button class="period" onclick="showLast('24h')">Last 24 Hours</button>
+    <button class="period" onclick="showLast('1w')">Last week</button>
+    <button class="period" onclick="showLast('2w')">Last 2 Weeks</button>
+    <button class="period" onclick="showLast('1m')">Last Month</button>
+    <button class="period" onclick="showLast('2m')">Last 2 Months</button>
+    <button class="period" onclick="showLast('1y')">Last Year</button>
+    <button class="period" onclick="showLast('2y')">Last 2 Years</button>
+    <button class="period" onclick="showLast('all')">All</button>
+  </div>
+  <div class="file">
+    <button onclick="export()">&#11015; Export</button>
+    <button onclick="clearAll()">&#9114; Clear All</button>
+    <button style="height: 100px;" onclick="import()">&#11014; Import (drop)</button>
+  </div>
   <script src="graph.js"></script>
   <script>
     width=800;
@@ -34,10 +148,10 @@
     {
       location.href="new_entry.html";
     }
-    function showLast(inderval)
+    function showLast(intvl)
     {
-      console.log("display "+inderval);
-      switch(inderval)
+      console.log("displaying "+intvl);
+      switch(intvl)
       {
         case "24h":
           showGraph(Date.now()-24*60*60*1000,Date.now(),60*60*1000);
